@@ -226,38 +226,6 @@ const Index = () => {
             }} />
           </div>
 
-          {/* Status badge */}
-          <div style={{
-            display: "flex", alignItems: "center", gap: "10px",
-            padding: "9px 26px", borderRadius: "100px",
-            background: sc.badgeBg,
-            border: `1.5px solid ${sc.border}`,
-            backdropFilter: "blur(12px)",
-            boxShadow: isLive ? `0 0 22px ${sc.glow}, inset 0 1px 0 rgba(255,255,255,0.08)` : "none",
-            animation: isLive ? "badgeGlow 2.5s ease-in-out infinite alternate" : "none",
-          }}>
-            <div style={{
-              width: "10px", height: "10px", borderRadius: "50%",
-              background: sc.dot,
-              boxShadow: sc.glowDot ? `0 0 8px 3px ${sc.dot}` : "none",
-              animation: sc.glowDot ? "dotPulse 1.2s ease-in-out infinite" : "none",
-              flexShrink: 0,
-            }} />
-            <span style={{
-              fontFamily: "'Montserrat', sans-serif",
-              fontSize: "clamp(0.8rem, 2.2vw, 1rem)",
-              fontWeight: 700, letterSpacing: "0.2em",
-              textTransform: "uppercase",
-              color: isLive ? "#e8b4ff" : "#8a7aa0",
-              textShadow: isLive ? "0 0 10px rgba(200,100,255,0.6)" : "none",
-            }}>
-              {sc.label}
-            </span>
-            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" style={{ opacity: isLive ? 0.9 : 0.4 }}>
-              <path d="M11.571 4.714h1.715v5.143H11.57zm4.715 0H18v5.143h-1.714zM6 0L1.714 4.286v15.428h5.143V24l4.286-4.286h3.428L22.286 12V0zm14.571 11.143l-3.428 3.428h-3.429l-3 3v-3H6.857V1.714h13.714z" fill={isLive ? "#c84fff" : "#6b5b85"} />
-            </svg>
-          </div>
-
           <p style={{
             fontSize: "clamp(0.7rem, 1.8vw, 0.88rem)", fontWeight: 500,
             letterSpacing: "0.28em", textTransform: "uppercase",
