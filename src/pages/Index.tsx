@@ -1,6 +1,7 @@
 import { useState, useEffect, useRef } from "react";
 
-const BUTTERFLY_COUNT = 18;
+const BUTTERFLY_COUNT = 16;
+const ONLINE = "offline"; // "online" | "offline" | "starting" | "afk"
 
 function randomBetween(a: number, b: number) {
   return a + Math.random() * (b - a);
@@ -22,45 +23,92 @@ const generateButterflies = (): Butterfly[] =>
     id: i,
     x: randomBetween(0, 100),
     y: randomBetween(0, 100),
-    size: randomBetween(10, 28),
-    duration: randomBetween(6, 16),
-    delay: randomBetween(0, 10),
-    opacity: randomBetween(0.35, 0.85),
-    hue: randomBetween(270, 310),
+    size: randomBetween(10, 26),
+    duration: randomBetween(7, 18),
+    delay: randomBetween(0, 12),
+    opacity: randomBetween(0.3, 0.8),
+    hue: randomBetween(270, 315),
   }));
 
 const ButterflyIcon = ({ size, hue, opacity }: { size: number; hue: number; opacity: number }) => (
-  <svg
-    width={size * 2}
-    height={size * 1.4}
-    viewBox="0 0 60 42"
-    fill="none"
-    style={{ opacity }}
-    xmlns="http://www.w3.org/2000/svg"
-  >
+  <svg width={size * 2} height={size * 1.4} viewBox="0 0 60 42" fill="none" style={{ opacity }}>
     <ellipse cx="16" cy="18" rx="14" ry="10" fill={`hsla(${hue}, 90%, 75%, 0.7)`} />
     <ellipse cx="44" cy="18" rx="14" ry="10" fill={`hsla(${hue}, 90%, 75%, 0.7)`} />
     <ellipse cx="19" cy="28" rx="10" ry="7" fill={`hsla(${hue + 15}, 80%, 65%, 0.6)`} />
     <ellipse cx="41" cy="28" rx="10" ry="7" fill={`hsla(${hue + 15}, 80%, 65%, 0.6)`} />
-    <ellipse cx="16" cy="18" rx="14" ry="10" fill={`hsla(${hue}, 100%, 85%, 0.25)`} />
-    <ellipse cx="44" cy="18" rx="14" ry="10" fill={`hsla(${hue}, 100%, 85%, 0.25)`} />
+    <ellipse cx="16" cy="18" rx="14" ry="10" fill={`hsla(${hue}, 100%, 90%, 0.2)`} />
+    <ellipse cx="44" cy="18" rx="14" ry="10" fill={`hsla(${hue}, 100%, 90%, 0.2)`} />
     <line x1="30" y1="4" x2="30" y2="38" stroke={`hsla(${hue - 20}, 60%, 40%, 0.8)`} strokeWidth="1.5" strokeLinecap="round" />
     <path d="M30 4 Q27 0 24 2" stroke={`hsla(${hue - 20}, 60%, 40%, 0.6)`} strokeWidth="1" fill="none" />
     <path d="M30 4 Q33 0 36 2" stroke={`hsla(${hue - 20}, 60%, 40%, 0.6)`} strokeWidth="1" fill="none" />
   </svg>
 );
 
-const ONLINE = "afk";
+const panels = [
+  {
+    id: "about",
+    icon: "✦",
+    label: "ОБО МНЕ",
+    desc: "Привет! Я V1ksteN — стример и геймер. Играю в разные игры, общаюсь с чатом и просто хорошо провожу время.",
+    color: "#c084fc",
+    glow: "rgba(192,132,252,0.5)",
+    link: null,
+  },
+  {
+    id: "telegram",
+    icon: "✈",
+    label: "TELEGRAM",
+    desc: "Новости, анонсы стримов и общение в моём Telegram-канале.",
+    color: "#818cf8",
+    glow: "rgba(129,140,248,0.5)",
+    link: "https://t.me/v1ksten",
+  },
+  {
+    id: "steam",
+    icon: "⚙",
+    label: "STEAM",
+    desc: "Мой профиль Steam — смотри что играю и добавляй в друзья.",
+    color: "#a78bfa",
+    glow: "rgba(167,139,250,0.5)",
+    link: "https://steamcommunity.com/id/v1ksten",
+  },
+  {
+    id: "donate",
+    icon: "♡",
+    label: "ДОНАТ",
+    desc: "Поддержи стрим — любая сумма приятна и мотивирует делать контент лучше!",
+    color: "#f0abfc",
+    glow: "rgba(240,171,252,0.6)",
+    link: "https://donate.stream/v1ksten",
+  },
+  {
+    id: "twitch",
+    icon: "▶",
+    label: "TWITCH",
+    desc: "Подписывайся на канал, чтобы не пропустить ни одного стрима!",
+    color: "#c084fc",
+    glow: "rgba(192,132,252,0.5)",
+    link: "https://twitch.tv/v1ksten",
+  },
+];
+
+const statusConfig = {
+  online: { label: "ОНЛАЙН", dot: "#c84fff", glowDot: true, badgeBg: "rgba(80,0,120,0.6)", border: "rgba(190,80,255,0.7)" },
+  starting: { label: "STARTING SOON", dot: "#a855f7", glowDot: true, badgeBg: "rgba(60,0,100,0.6)", border: "rgba(168,85,247,0.7)" },
+  afk: { label: "AFK", dot: "#7c3aed", glowDot: true, badgeBg: "rgba(50,10,90,0.6)", border: "rgba(124,58,237,0.6)" },
+  offline: { label: "ОФЛАЙН", dot: "#6b5b85", glowDot: false, badgeBg: "rgba(30,20,50,0.55)", border: "rgba(100,80,130,0.4)" },
+};
 
 const Index = () => {
   const [butterflies] = useState<Butterfly[]>(generateButterflies);
-  const status = ONLINE; // "online" | "offline" | "starting"
-  const isOnline = status === "online" || status === "starting" || status === "afk";
+  const status = ONLINE as keyof typeof statusConfig;
+  const sc = statusConfig[status] ?? statusConfig.offline;
+  const isLive = status !== "offline";
   const [tick, setTick] = useState(0);
   const canvasRef = useRef<HTMLCanvasElement>(null);
 
   useEffect(() => {
-    const interval = setInterval(() => setTick((t) => t + 1), 50);
+    const interval = setInterval(() => setTick((t) => t + 1), 60);
     return () => clearInterval(interval);
   }, []);
 
@@ -71,241 +119,315 @@ const Index = () => {
     if (!ctx) return;
     canvas.width = canvas.offsetWidth;
     canvas.height = canvas.offsetHeight;
-
     ctx.clearRect(0, 0, canvas.width, canvas.height);
-
     const t = Date.now() / 1000;
-    for (let i = 0; i < 60; i++) {
-      const x = (Math.sin(i * 2.4 + t * 0.3) * 0.5 + 0.5) * canvas.width;
-      const y = (Math.cos(i * 1.7 + t * 0.2) * 0.5 + 0.5) * canvas.height;
-      const r = Math.random() * 2 + 0.5;
+    for (let i = 0; i < 55; i++) {
+      const x = (Math.sin(i * 2.4 + t * 0.25) * 0.5 + 0.5) * canvas.width;
+      const y = (Math.cos(i * 1.7 + t * 0.18) * 0.5 + 0.5) * canvas.height;
+      const r = Math.random() * 1.8 + 0.4;
       ctx.beginPath();
       ctx.arc(x, y, r, 0, Math.PI * 2);
-      ctx.fillStyle = `hsla(${280 + Math.sin(i) * 30}, 90%, 80%, ${0.3 + Math.random() * 0.4})`;
+      ctx.fillStyle = `hsla(${280 + Math.sin(i) * 30}, 90%, 80%, ${0.25 + Math.random() * 0.4})`;
       ctx.fill();
     }
   }, [tick]);
 
   return (
     <div
-      className="relative w-full overflow-hidden flex items-center justify-center"
       style={{
         minHeight: "100vh",
-        background: "#08020f",
+        background: "#06010e",
         fontFamily: "'Montserrat', sans-serif",
+        overflowX: "hidden",
       }}
     >
-      {/* Background image */}
-      <div
-        className="absolute inset-0"
-        style={{
-          backgroundImage: `url(https://cdn.poehali.dev/projects/6e81497b-6f59-434e-8a70-5f4bc57ba281/bucket/f09630a2-0999-4c1a-a0f5-dec04604aaaa.jpg)`,
-          backgroundSize: "cover",
-          backgroundPosition: "center",
-          filter: "brightness(0.45) saturate(1.3)",
-        }}
-      />
-
-      {/* Dark overlay gradient */}
-      <div
-        className="absolute inset-0"
-        style={{
-          background:
-            "radial-gradient(ellipse 80% 60% at 50% 60%, rgba(80,0,120,0.25) 0%, rgba(8,2,15,0.7) 100%)",
-        }}
-      />
-
-      {/* Particle canvas */}
-      <canvas
-        ref={canvasRef}
-        className="absolute inset-0 w-full h-full pointer-events-none"
-        style={{ mixBlendMode: "screen", opacity: 0.6 }}
-      />
-
-      {/* Floating butterflies */}
-      {butterflies.map((b) => (
+      {/* ───── HERO BANNER ───── */}
+      <div className="relative w-full overflow-hidden flex items-center justify-center" style={{ height: "100vh" }}>
+        {/* BG image */}
         <div
-          key={b.id}
-          className="absolute pointer-events-none"
+          className="absolute inset-0"
           style={{
-            left: `${b.x}%`,
-            top: `${b.y}%`,
-            animation: `float-butterfly-${b.id % 4} ${b.duration}s ${b.delay}s infinite ease-in-out`,
-            filter: `drop-shadow(0 0 6px hsla(${b.hue}, 100%, 80%, 0.8))`,
-          }}
-        >
-          <ButterflyIcon size={b.size} hue={b.hue} opacity={b.opacity} />
-        </div>
-      ))}
-
-      {/* Main banner content */}
-      <div className="relative z-10 flex flex-col items-center justify-center" style={{ gap: "2rem", marginTop: "58vh" }}>
-        {/* Glow ring */}
-        <div
-          style={{
-            position: "absolute",
-            width: "520px",
-            height: "220px",
-            borderRadius: "50%",
-            background: "radial-gradient(ellipse, rgba(160,60,255,0.18) 0%, transparent 70%)",
-            filter: "blur(32px)",
-            pointerEvents: "none",
+            backgroundImage: `url(https://cdn.poehali.dev/projects/6e81497b-6f59-434e-8a70-5f4bc57ba281/bucket/92894dad-9e11-49f7-91de-e3b2ee711b94.jpg)`,
+            backgroundSize: "cover",
+            backgroundPosition: "center top",
+            filter: "brightness(0.5) saturate(1.4)",
           }}
         />
+        <div
+          className="absolute inset-0"
+          style={{
+            background: "radial-gradient(ellipse 90% 70% at 60% 40%, rgba(80,0,130,0.2) 0%, rgba(6,1,14,0.65) 100%)",
+          }}
+        />
+        {/* bottom fade */}
+        <div
+          className="absolute bottom-0 left-0 right-0"
+          style={{ height: "180px", background: "linear-gradient(to top, #06010e, transparent)" }}
+        />
 
-        {/* Streamer name */}
-        <div className="flex flex-col items-center" style={{ gap: "0.5rem" }}>
-          <span
+        {/* Particles */}
+        <canvas
+          ref={canvasRef}
+          className="absolute inset-0 w-full h-full pointer-events-none"
+          style={{ mixBlendMode: "screen", opacity: 0.55 }}
+        />
+
+        {/* Butterflies */}
+        {butterflies.map((b) => (
+          <div
+            key={b.id}
+            className="absolute pointer-events-none"
             style={{
+              left: `${b.x}%`,
+              top: `${b.y}%`,
+              animation: `float-b${b.id % 4} ${b.duration}s ${b.delay}s infinite ease-in-out`,
+              filter: `drop-shadow(0 0 5px hsla(${b.hue}, 100%, 80%, 0.9))`,
+            }}
+          >
+            <ButterflyIcon size={b.size} hue={b.hue} opacity={b.opacity} />
+          </div>
+        ))}
+
+        {/* Hero text — over legs area */}
+        <div
+          className="relative z-10 flex flex-col items-center"
+          style={{ gap: "1.4rem", marginTop: "58vh" }}
+        >
+          {/* Glow halo */}
+          <div style={{
+            position: "absolute",
+            width: "560px", height: "200px",
+            borderRadius: "50%",
+            background: "radial-gradient(ellipse, rgba(160,60,255,0.2) 0%, transparent 70%)",
+            filter: "blur(30px)",
+            pointerEvents: "none",
+          }} />
+
+          {/* Name */}
+          <div className="flex flex-col items-center" style={{ gap: "0.4rem" }}>
+            <span style={{
               fontFamily: "'Cinzel Decorative', serif",
-              fontSize: "clamp(2.8rem, 8vw, 6.5rem)",
+              fontSize: "clamp(2.6rem, 7.5vw, 6rem)",
               fontWeight: 900,
               letterSpacing: "0.08em",
               color: "#fff",
-              textShadow:
-                "0 0 20px rgba(190,80,255,0.9), 0 0 60px rgba(160,40,255,0.7), 0 0 120px rgba(120,20,220,0.5), 0 2px 4px rgba(0,0,0,0.9)",
+              textShadow: "0 0 20px rgba(190,80,255,0.9), 0 0 60px rgba(160,40,255,0.7), 0 0 120px rgba(120,20,220,0.5), 0 2px 4px rgba(0,0,0,0.95)",
               lineHeight: 1,
-              WebkitTextStroke: "1px rgba(210,120,255,0.4)",
-              animation: "name-glow 3s ease-in-out infinite alternate",
-            }}
-          >
-            V1ksteN
-          </span>
+              WebkitTextStroke: "1px rgba(210,120,255,0.35)",
+              animation: "nameGlow 3s ease-in-out infinite alternate",
+            }}>
+              V1ksteN
+            </span>
+            <div style={{
+              width: "100%", height: "2px",
+              background: "linear-gradient(90deg, transparent, rgba(190,80,255,0.9), rgba(140,200,255,0.5), rgba(190,80,255,0.9), transparent)",
+              boxShadow: "0 0 14px rgba(190,80,255,0.7)",
+              animation: "linePulse 2s ease-in-out infinite alternate",
+            }} />
+          </div>
 
-          {/* Decorative line */}
-          <div
-            style={{
-              width: "100%",
-              height: "2px",
-              background: "linear-gradient(90deg, transparent, rgba(190,80,255,0.8), rgba(140,200,255,0.6), rgba(190,80,255,0.8), transparent)",
-              borderRadius: "2px",
-              boxShadow: "0 0 12px rgba(190,80,255,0.6)",
-              animation: "line-pulse 2s ease-in-out infinite alternate",
-            }}
-          />
-        </div>
-
-        {/* Status badge */}
-        <div
-          style={{
-            display: "flex",
-            alignItems: "center",
-            gap: "10px",
-            padding: "10px 28px",
-            borderRadius: "100px",
-            background: isOnline
-              ? "rgba(80, 0, 120, 0.55)"
-              : "rgba(30, 20, 50, 0.55)",
-            border: isOnline
-              ? "1.5px solid rgba(190,80,255,0.7)"
-              : "1.5px solid rgba(100,80,130,0.4)",
-            backdropFilter: "blur(10px)",
-            boxShadow: isOnline
-              ? "0 0 20px rgba(190,80,255,0.35), inset 0 1px 0 rgba(255,255,255,0.1)"
-              : "0 0 8px rgba(80,60,100,0.2)",
-            animation: isOnline ? "badge-glow 2.5s ease-in-out infinite alternate" : "none",
-          }}
-        >
-          {/* Status dot */}
-          <div
-            style={{
-              width: "10px",
-              height: "10px",
-              borderRadius: "50%",
-              background: isOnline ? "#c84fff" : "#6b5b85",
-              boxShadow: isOnline ? "0 0 8px 3px rgba(200,80,255,0.8)" : "none",
-              animation: isOnline ? "dot-pulse 1.2s ease-in-out infinite" : "none",
+          {/* Status badge */}
+          <div style={{
+            display: "flex", alignItems: "center", gap: "10px",
+            padding: "9px 26px", borderRadius: "100px",
+            background: sc.badgeBg,
+            border: `1.5px solid ${sc.border}`,
+            backdropFilter: "blur(12px)",
+            boxShadow: isLive ? `0 0 22px ${sc.glow}, inset 0 1px 0 rgba(255,255,255,0.08)` : "none",
+            animation: isLive ? "badgeGlow 2.5s ease-in-out infinite alternate" : "none",
+          }}>
+            <div style={{
+              width: "10px", height: "10px", borderRadius: "50%",
+              background: sc.dot,
+              boxShadow: sc.glowDot ? `0 0 8px 3px ${sc.dot}` : "none",
+              animation: sc.glowDot ? "dotPulse 1.2s ease-in-out infinite" : "none",
               flexShrink: 0,
-            }}
-          />
-          <span
-            style={{
+            }} />
+            <span style={{
               fontFamily: "'Montserrat', sans-serif",
-              fontSize: "clamp(0.85rem, 2.5vw, 1.1rem)",
-              fontWeight: 700,
-              letterSpacing: "0.18em",
+              fontSize: "clamp(0.8rem, 2.2vw, 1rem)",
+              fontWeight: 700, letterSpacing: "0.2em",
               textTransform: "uppercase",
-              color: isOnline ? "#e8b4ff" : "#8a7aa0",
-              textShadow: isOnline ? "0 0 10px rgba(200,100,255,0.6)" : "none",
-            }}
-          >
-            {status === "online" ? "ОНЛАЙН" : status === "starting" ? "STARTING SOON" : status === "afk" ? "AFK" : "ОФЛАЙН"}
-          </span>
+              color: isLive ? "#e8b4ff" : "#8a7aa0",
+              textShadow: isLive ? "0 0 10px rgba(200,100,255,0.6)" : "none",
+            }}>
+              {sc.label}
+            </span>
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" style={{ opacity: isLive ? 0.9 : 0.4 }}>
+              <path d="M11.571 4.714h1.715v5.143H11.57zm4.715 0H18v5.143h-1.714zM6 0L1.714 4.286v15.428h5.143V24l4.286-4.286h3.428L22.286 12V0zm14.571 11.143l-3.428 3.428h-3.429l-3 3v-3H6.857V1.714h13.714z" fill={isLive ? "#c84fff" : "#6b5b85"} />
+            </svg>
+          </div>
 
-          {/* Twitch icon */}
-          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" style={{ opacity: isOnline ? 0.9 : 0.4 }}>
-            <path d="M11.571 4.714h1.715v5.143H11.57zm4.715 0H18v5.143h-1.714zM6 0L1.714 4.286v15.428h5.143V24l4.286-4.286h3.428L22.286 12V0zm14.571 11.143l-3.428 3.428h-3.429l-3 3v-3H6.857V1.714h13.714z" fill={isOnline ? "#c84fff" : "#6b5b85"} />
-          </svg>
+          <p style={{
+            fontSize: "clamp(0.7rem, 1.8vw, 0.88rem)", fontWeight: 500,
+            letterSpacing: "0.28em", textTransform: "uppercase",
+            color: "rgba(200,160,255,0.5)", textAlign: "center",
+          }}>
+            twitch.tv/v1ksten
+          </p>
         </div>
-
-        {/* Subtitle */}
-        <p
-          style={{
-            fontFamily: "'Montserrat', sans-serif",
-            fontSize: "clamp(0.75rem, 2vw, 0.95rem)",
-            fontWeight: 500,
-            letterSpacing: "0.25em",
-            textTransform: "uppercase",
-            color: "rgba(200,160,255,0.55)",
-            textAlign: "center",
-            textShadow: "0 0 8px rgba(150,80,220,0.4)",
-          }}
-        >
-          twitch.tv/v1ksten
-        </p>
       </div>
 
-      {/* Bottom decorative wisteria glow */}
-      <div
-        style={{
-          position: "absolute",
-          bottom: 0,
-          left: 0,
-          right: 0,
-          height: "200px",
-          background: "linear-gradient(to top, rgba(60,0,100,0.5), transparent)",
-          pointerEvents: "none",
-        }}
-      />
+      {/* ───── PANELS SECTION ───── */}
+      <div style={{
+        padding: "60px 24px 80px",
+        background: "linear-gradient(180deg, #06010e 0%, #0d0220 50%, #06010e 100%)",
+      }}>
+        {/* Section label */}
+        <div className="flex items-center justify-center" style={{ marginBottom: "40px", gap: "16px" }}>
+          <div style={{ flex: 1, height: "1px", background: "linear-gradient(to right, transparent, rgba(190,80,255,0.4))" }} />
+          <span style={{
+            fontFamily: "'Cinzel Decorative', serif",
+            fontSize: "clamp(0.7rem, 1.5vw, 0.9rem)",
+            letterSpacing: "0.35em", textTransform: "uppercase",
+            color: "rgba(200,150,255,0.6)",
+          }}>
+            НАВИГАЦИЯ
+          </span>
+          <div style={{ flex: 1, height: "1px", background: "linear-gradient(to left, transparent, rgba(190,80,255,0.4))" }} />
+        </div>
+
+        {/* Panels grid */}
+        <div style={{
+          display: "grid",
+          gridTemplateColumns: "repeat(auto-fit, minmax(200px, 1fr))",
+          gap: "16px",
+          maxWidth: "1100px",
+          margin: "0 auto",
+        }}>
+          {panels.map((p) => (
+            <a
+              key={p.id}
+              href={p.link ?? "#"}
+              target={p.link ? "_blank" : undefined}
+              rel="noopener noreferrer"
+              style={{ textDecoration: "none" }}
+            >
+              <div
+                className="panel-card"
+                style={{
+                  position: "relative",
+                  padding: "28px 22px",
+                  borderRadius: "16px",
+                  background: "rgba(20,6,40,0.7)",
+                  border: `1px solid rgba(150,80,220,0.25)`,
+                  backdropFilter: "blur(14px)",
+                  cursor: p.link ? "pointer" : "default",
+                  transition: "transform 0.3s ease, box-shadow 0.3s ease, border-color 0.3s ease",
+                  overflow: "hidden",
+                }}
+                onMouseEnter={(e) => {
+                  (e.currentTarget as HTMLDivElement).style.transform = "translateY(-6px)";
+                  (e.currentTarget as HTMLDivElement).style.boxShadow = `0 16px 48px ${p.glow}`;
+                  (e.currentTarget as HTMLDivElement).style.borderColor = `${p.color}55`;
+                }}
+                onMouseLeave={(e) => {
+                  (e.currentTarget as HTMLDivElement).style.transform = "translateY(0)";
+                  (e.currentTarget as HTMLDivElement).style.boxShadow = "none";
+                  (e.currentTarget as HTMLDivElement).style.borderColor = "rgba(150,80,220,0.25)";
+                }}
+              >
+                {/* Corner glow */}
+                <div style={{
+                  position: "absolute", top: 0, left: 0, right: 0, height: "1px",
+                  background: `linear-gradient(90deg, transparent, ${p.color}66, transparent)`,
+                }} />
+
+                {/* Icon */}
+                <div style={{
+                  fontSize: "1.8rem", marginBottom: "12px",
+                  color: p.color,
+                  textShadow: `0 0 12px ${p.glow}`,
+                  filter: `drop-shadow(0 0 8px ${p.color})`,
+                }}>
+                  {p.icon}
+                </div>
+
+                {/* Label */}
+                <div style={{
+                  fontFamily: "'Cinzel Decorative', serif",
+                  fontSize: "clamp(0.65rem, 1.4vw, 0.8rem)",
+                  fontWeight: 700, letterSpacing: "0.22em",
+                  color: p.color,
+                  textShadow: `0 0 8px ${p.glow}`,
+                  marginBottom: "10px",
+                }}>
+                  {p.label}
+                </div>
+
+                {/* Divider */}
+                <div style={{
+                  width: "40px", height: "1px", marginBottom: "12px",
+                  background: `linear-gradient(90deg, ${p.color}80, transparent)`,
+                }} />
+
+                {/* Description */}
+                <p style={{
+                  fontFamily: "'Montserrat', sans-serif",
+                  fontSize: "clamp(0.72rem, 1.3vw, 0.82rem)",
+                  fontWeight: 400, lineHeight: 1.65,
+                  color: "rgba(200,180,220,0.7)",
+                  margin: 0,
+                }}>
+                  {p.desc}
+                </p>
+
+                {/* Arrow if has link */}
+                {p.link && (
+                  <div style={{
+                    marginTop: "16px", fontSize: "0.75rem",
+                    color: `${p.color}99`, letterSpacing: "0.15em",
+                    fontWeight: 600,
+                  }}>
+                    ПЕРЕЙТИ →
+                  </div>
+                )}
+              </div>
+            </a>
+          ))}
+        </div>
+      </div>
 
       <style>{`
-        @keyframes float-butterfly-0 {
-          0%, 100% { transform: translate(0, 0) rotate(-5deg) scaleX(1); }
-          25% { transform: translate(30px, -40px) rotate(5deg) scaleX(-1); }
-          50% { transform: translate(-20px, -70px) rotate(-8deg) scaleX(1); }
-          75% { transform: translate(40px, -30px) rotate(3deg) scaleX(-1); }
+        @import url('https://fonts.googleapis.com/css2?family=Cinzel+Decorative:wght@700;900&family=Montserrat:wght@400;500;700&display=swap');
+
+        @keyframes float-b0 {
+          0%,100% { transform: translate(0,0) rotate(-5deg) scaleX(1); }
+          25% { transform: translate(28px,-42px) rotate(5deg) scaleX(-1); }
+          50% { transform: translate(-18px,-70px) rotate(-8deg) scaleX(1); }
+          75% { transform: translate(38px,-28px) rotate(3deg) scaleX(-1); }
         }
-        @keyframes float-butterfly-1 {
-          0%, 100% { transform: translate(0, 0) rotate(8deg) scaleX(-1); }
-          30% { transform: translate(-40px, -50px) rotate(-4deg) scaleX(1); }
-          60% { transform: translate(25px, -80px) rotate(10deg) scaleX(-1); }
-          80% { transform: translate(-15px, -20px) rotate(-6deg) scaleX(1); }
+        @keyframes float-b1 {
+          0%,100% { transform: translate(0,0) rotate(8deg) scaleX(-1); }
+          30% { transform: translate(-38px,-52px) rotate(-4deg) scaleX(1); }
+          60% { transform: translate(22px,-78px) rotate(10deg) scaleX(-1); }
+          80% { transform: translate(-14px,-18px) rotate(-6deg) scaleX(1); }
         }
-        @keyframes float-butterfly-2 {
-          0%, 100% { transform: translate(0, 0) rotate(-3deg); }
-          40% { transform: translate(50px, -60px) rotate(6deg) scaleX(-1); }
-          70% { transform: translate(-30px, -45px) rotate(-10deg) scaleX(1); }
+        @keyframes float-b2 {
+          0%,100% { transform: translate(0,0) rotate(-3deg); }
+          40% { transform: translate(48px,-58px) rotate(6deg) scaleX(-1); }
+          70% { transform: translate(-28px,-44px) rotate(-10deg) scaleX(1); }
         }
-        @keyframes float-butterfly-3 {
-          0%, 100% { transform: translate(0, 0) rotate(4deg) scaleX(1); }
-          35% { transform: translate(-25px, -55px) rotate(-7deg) scaleX(-1); }
-          65% { transform: translate(35px, -35px) rotate(8deg) scaleX(1); }
+        @keyframes float-b3 {
+          0%,100% { transform: translate(0,0) rotate(4deg) scaleX(1); }
+          35% { transform: translate(-24px,-54px) rotate(-7deg) scaleX(-1); }
+          65% { transform: translate(34px,-34px) rotate(8deg) scaleX(1); }
         }
-        @keyframes name-glow {
-          0% { text-shadow: 0 0 20px rgba(190,80,255,0.9), 0 0 60px rgba(160,40,255,0.7), 0 0 120px rgba(120,20,220,0.5), 0 2px 4px rgba(0,0,0,0.9); }
-          100% { text-shadow: 0 0 30px rgba(210,120,255,1), 0 0 80px rgba(180,60,255,0.9), 0 0 160px rgba(140,40,240,0.7), 0 2px 4px rgba(0,0,0,0.9); }
+        @keyframes nameGlow {
+          0% { text-shadow: 0 0 20px rgba(190,80,255,0.9), 0 0 60px rgba(160,40,255,0.7), 0 0 120px rgba(120,20,220,0.5), 0 2px 4px rgba(0,0,0,0.95); }
+          100% { text-shadow: 0 0 30px rgba(215,130,255,1), 0 0 80px rgba(185,65,255,0.9), 0 0 160px rgba(145,45,240,0.7), 0 2px 4px rgba(0,0,0,0.95); }
         }
-        @keyframes dot-pulse {
-          0%, 100% { transform: scale(1); opacity: 1; }
-          50% { transform: scale(1.4); opacity: 0.7; }
+        @keyframes dotPulse {
+          0%,100% { transform: scale(1); opacity: 1; }
+          50% { transform: scale(1.45); opacity: 0.65; }
         }
-        @keyframes badge-glow {
-          0% { box-shadow: 0 0 20px rgba(190,80,255,0.35), inset 0 1px 0 rgba(255,255,255,0.1); }
-          100% { box-shadow: 0 0 35px rgba(190,80,255,0.6), inset 0 1px 0 rgba(255,255,255,0.15); }
+        @keyframes badgeGlow {
+          0% { box-shadow: 0 0 18px rgba(190,80,255,0.3), inset 0 1px 0 rgba(255,255,255,0.08); }
+          100% { box-shadow: 0 0 34px rgba(190,80,255,0.58), inset 0 1px 0 rgba(255,255,255,0.14); }
         }
-        @keyframes line-pulse {
-          0% { opacity: 0.7; }
-          100% { opacity: 1; box-shadow: 0 0 20px rgba(190,80,255,0.9); }
+        @keyframes linePulse {
+          0% { opacity: 0.65; }
+          100% { opacity: 1; box-shadow: 0 0 22px rgba(190,80,255,0.9); }
         }
       `}</style>
     </div>
