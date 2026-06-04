@@ -75,26 +75,7 @@ const panels = [
     glow: "rgba(167,139,250,0.5)",
     link: "https://steamcommunity.com/profiles/76561198220657831/",
   },
-  {
-    id: "pc",
-    icon: "🖥",
-    label: "МОЙ ПК",
-    image: null,
-    desc: "Процессор, видеокарта, периферия — всё моё железо для игр и стримов.",
-    color: "#818cf8",
-    glow: "rgba(129,140,248,0.5)",
-    link: null,
-  },
-  {
-    id: "telegram",
-    icon: "✈",
-    label: "TELEGRAM",
-    image: null,
-    desc: "Новости, анонсы стримов и общение в моём Telegram-канале.",
-    color: "#818cf8",
-    glow: "rgba(129,140,248,0.5)",
-    link: "https://t.me/v1ksten",
-  },
+
 ];
 
 const statusConfig = {
