@@ -49,46 +49,51 @@ const panels = [
     id: "about",
     icon: "✦",
     label: "ОБО МНЕ",
+    image: "https://cdn.poehali.dev/projects/6e81497b-6f59-434e-8a70-5f4bc57ba281/bucket/0f3e04b9-c323-47db-be50-9fa78eaca11c.jpg",
     desc: "Привет! Я V1ksteN — стримерша и геймерша. Играю в разные игры, общаюсь с чатом и просто хорошо провожу время.",
     color: "#c084fc",
     glow: "rgba(192,132,252,0.5)",
     link: null,
   },
   {
-    id: "telegram",
-    icon: "✈",
-    label: "TELEGRAM",
-    desc: "Новости, анонсы стримов и общение в моём Telegram-канале.",
-    color: "#818cf8",
-    glow: "rgba(129,140,248,0.5)",
-    link: "https://t.me/v1ksten",
-  },
-  {
-    id: "steam",
-    icon: "⚙",
-    label: "STEAM",
-    desc: "Мой профиль Steam — смотри что играю и добавляй в друзья.",
-    color: "#a78bfa",
-    glow: "rgba(167,139,250,0.5)",
-    link: "https://steamcommunity.com/id/v1ksten",
-  },
-  {
     id: "donate",
     icon: "♡",
     label: "ДОНАТ",
+    image: null,
     desc: "Поддержи стрим — любая сумма приятна и мотивирует делать контент лучше!",
     color: "#f0abfc",
     glow: "rgba(240,171,252,0.6)",
     link: "https://donate.stream/v1ksten",
   },
   {
-    id: "twitch",
-    icon: "▶",
-    label: "TWITCH",
-    desc: "Подписывайся на канал, чтобы не пропустить ни одного стрима!",
-    color: "#c084fc",
-    glow: "rgba(192,132,252,0.5)",
-    link: "https://twitch.tv/v1ksten",
+    id: "steam",
+    icon: "⚙",
+    label: "STEAM",
+    image: null,
+    desc: "Мой профиль Steam — смотри что играю и добавляй в друзья.",
+    color: "#a78bfa",
+    glow: "rgba(167,139,250,0.5)",
+    link: "https://steamcommunity.com/id/v1ksten",
+  },
+  {
+    id: "pc",
+    icon: "🖥",
+    label: "МОЙ ПК",
+    image: null,
+    desc: "Процессор, видеокарта, периферия — всё моё железо для игр и стримов.",
+    color: "#818cf8",
+    glow: "rgba(129,140,248,0.5)",
+    link: null,
+  },
+  {
+    id: "telegram",
+    icon: "✈",
+    label: "TELEGRAM",
+    image: null,
+    desc: "Новости, анонсы стримов и общение в моём Telegram-канале.",
+    color: "#818cf8",
+    glow: "rgba(129,140,248,0.5)",
+    link: "https://t.me/v1ksten",
   },
 ];
 
@@ -300,6 +305,25 @@ const Index = () => {
                   position: "absolute", top: 0, left: 0, right: 0, height: "1px",
                   background: `linear-gradient(90deg, transparent, ${p.color}66, transparent)`,
                 }} />
+
+                {/* Panel image */}
+                {p.image && (
+                  <div style={{
+                    width: "calc(100% + 44px)", marginLeft: "-22px", marginTop: "-28px",
+                    marginBottom: "16px", height: "140px", overflow: "hidden",
+                    borderRadius: "16px 16px 0 0",
+                  }}>
+                    <img src={p.image} alt={p.label} style={{
+                      width: "100%", height: "100%", objectFit: "cover",
+                      objectPosition: "center top",
+                      filter: "brightness(0.85) saturate(1.3)",
+                    }} />
+                    <div style={{
+                      position: "absolute", top: 0, left: 0, right: 0, height: "140px",
+                      background: `linear-gradient(to bottom, transparent 50%, rgba(20,6,40,0.9) 100%)`,
+                    }} />
+                  </div>
+                )}
 
                 {/* Icon */}
                 <div style={{
