@@ -50,7 +50,7 @@ const ButterflyIcon = ({ size, hue, opacity }: { size: number; hue: number; opac
   </svg>
 );
 
-const ONLINE = "starting";
+const ONLINE = "offline";
 
 const Index = () => {
   const [butterflies] = useState<Butterfly[]>(generateButterflies);
