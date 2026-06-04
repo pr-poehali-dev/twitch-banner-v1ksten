@@ -50,12 +50,12 @@ const ButterflyIcon = ({ size, hue, opacity }: { size: number; hue: number; opac
   </svg>
 );
 
-const ONLINE = "offline";
+const ONLINE = "afk";
 
 const Index = () => {
   const [butterflies] = useState<Butterfly[]>(generateButterflies);
   const status = ONLINE; // "online" | "offline" | "starting"
-  const isOnline = status === "online" || status === "starting";
+  const isOnline = status === "online" || status === "starting" || status === "afk";
   const [tick, setTick] = useState(0);
   const canvasRef = useRef<HTMLCanvasElement>(null);
 
@@ -229,7 +229,7 @@ const Index = () => {
               textShadow: isOnline ? "0 0 10px rgba(200,100,255,0.6)" : "none",
             }}
           >
-            {status === "online" ? "ОНЛАЙН" : status === "starting" ? "STARTING SOON" : "ОФЛАЙН"}
+            {status === "online" ? "ОНЛАЙН" : status === "starting" ? "STARTING SOON" : status === "afk" ? "AFK" : "ОФЛАЙН"}
           </span>
 
           {/* Twitch icon */}
