@@ -60,7 +60,7 @@ const panels = [
     icon: "♡",
     label: "DONATE",
     image: null,
-    desc: "Support the stream — every donation is appreciated and motivates me to make better content!\nПоддержи стрим — любая сумма приятна и мотивирует делать контент лучше!",
+    desc: "Поддержи стрим — любая сумма приятна и мотивирует делать контент лучше!",
     color: "#f0abfc",
     glow: "rgba(240,171,252,0.6)",
     link: "https://www.donationalerts.com/r/v1ksten",
