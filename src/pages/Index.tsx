@@ -138,7 +138,7 @@ const Index = () => {
       ))}
 
       {/* Main banner content */}
-      <div className="relative z-10 flex flex-col items-center justify-center" style={{ gap: "2rem", marginTop: "30vh" }}>
+      <div className="relative z-10 flex flex-col items-center justify-center" style={{ gap: "2rem", marginTop: "58vh" }}>
         {/* Glow ring */}
         <div
           style={{
