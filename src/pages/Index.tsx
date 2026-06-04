@@ -50,7 +50,7 @@ const panels = [
     icon: "✦",
     label: "ОБО МНЕ",
     image: "https://cdn.poehali.dev/projects/6e81497b-6f59-434e-8a70-5f4bc57ba281/bucket/0f3e04b9-c323-47db-be50-9fa78eaca11c.jpg",
-    desc: "Я V1ksteN — стримерша и геймерша. Меня зовут Виктория. Я из Москвы.",
+    desc: "Я V1ksteN — стримерша и геймерша. Меня зовут Виктория. Я из Москвы. Я не слышу и владею жестовым языком.",
     color: "#c084fc",
     glow: "rgba(192,132,252,0.5)",
     link: null,
