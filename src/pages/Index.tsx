@@ -73,7 +73,7 @@ const panels = [
     desc: "Мой профиль Steam — смотри что играю и добавляй в друзья.",
     color: "#a78bfa",
     glow: "rgba(167,139,250,0.5)",
-    link: "https://steamcommunity.com/id/v1ksten",
+    link: "https://steamcommunity.com/profiles/76561198220657831/",
   },
   {
     id: "pc",
